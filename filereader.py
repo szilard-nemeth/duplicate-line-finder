@@ -48,19 +48,27 @@ class FileReader:
 
     def collect_lines(self):
         self.unique_items = 0
-        for file in os.listdir(self.src_dir):
-            if file.endswith(self.parser.extension):
-                file_name = os.path.join(self.src_dir, file)
-                print('Processing file: ' + file_name)
-                self.parser.parse(file_name)
-                print("Found " + str(self.parser.get_element_count()) + " elements in " + file)
+        for file_name in os.listdir(self.src_dir):
+            if file_name.endswith(self.parser.extension):
+                file_path = os.path.join(self.src_dir, file_name)
+                print('Processing file: {0}'.format(file_path))
+
+                last_read_line_count = 0
+                with codecs.open(file_path, "r", encoding='utf-8', errors='ignore') as file:
+                    for line_idx, line in enumerate(file):
+                        # line_idx is starting from 0
+                        line_number = line_idx + 1
+                        self.parser.process_line(line, file_path, line_number)
+                        last_read_line_count = line_number
+
+                print("Found {0} elements in file {1}".format(str(last_read_line_count), file_path))
 
                 unique_items_length_old = self.unique_items
-                self.unique_items += self.parser.get_element_count()
+                self.unique_items += last_read_line_count
                 print('Changed count of unique items (sum of all files): {0} --> {1}'.format(unique_items_length_old,
                                                                                              self.unique_items))
 
-        print('Found ' + str(self.unique_items) + " unique elements in the files above")
+        print('Found {0} unique elements in ALL FILES'.format(str(self.unique_items)))
 
     def delete_lines_from(self, delete_from_files):
         for file_name in delete_from_files.keys():

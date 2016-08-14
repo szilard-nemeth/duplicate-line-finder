@@ -25,25 +25,14 @@ class SimpleTextParser():
 
     def __init__(self):
         self.hashed_lines = dict()
-        self.last_read_line_count = 0
 
-    def parse(self, file_name):
-        self.last_read_line_count = 0
-        with codecs.open(file_name, "r", encoding='utf-8', errors='ignore') as file:
-            for line_idx, line in enumerate(file):
-                # line_idx is starting from 0
-                line_number = line_idx + 1
-                self.last_read_line_count = line_number
-                hashed_line = hashlib.md5(line.encode('utf-8')).hexdigest()
+    def process_line(self, content, file_name, line_number):
+        hashed_line = hashlib.md5(content.encode('utf-8')).hexdigest()
 
-                line_number = line_idx + 1
-                if hashed_line in self.hashed_lines:
-                    self.hashed_lines[hashed_line].add_file(file_name, line_number)
-                else:
-                    self.hashed_lines[hashed_line] = Entry(file_name, line, line_number)
-
-    def get_element_count(self):
-        return self.last_read_line_count
+        if hashed_line in self.hashed_lines:
+            self.hashed_lines[hashed_line].add_file(file_name, line_number)
+        else:
+            self.hashed_lines[hashed_line] = Entry(file_name, content, line_number)
 
     def print_all(self):
         for i, hashed_line in enumerate(self.hashed_lines):
@@ -58,11 +47,11 @@ class SimpleTextParser():
 
         # key: hash, value: Entry
         for key, value in hashed_lines.items():
-            #filenames the lines should be deleted from
+            # filenames the lines should be deleted from
             for file_name in processable_file_names:
-                #processable_file_name is part of filenames list and there is more than 1 filename for the particular hash
+                # processable_file_name is part of filenames list and there is more than 1 filename for the particular hash
                 if file_name in value.filenames and len(value.filenames) > 1:
-                    ##value[file_name] contains the line numbers for the matched file
+                    # value[file_name] contains the line numbers for the matched file
                     if file_name in filenames_and_line_numbers:
                         filenames_and_line_numbers[file_name].extend(value.filenames[file_name])
                     else:
