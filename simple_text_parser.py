@@ -1,11 +1,9 @@
-import codecs
 import hashlib
 import sys
 import os
 
 scriptpath = "../collector.py"
 sys.path.append(os.path.abspath(scriptpath))
-import filereader
 
 
 class Entry():
@@ -58,16 +56,3 @@ class SimpleTextParser():
                         filenames_and_line_numbers[file_name] = value.filenames[file_name]
 
         return filenames_and_line_numbers
-
-
-if __name__ == "__main__":
-    arg_parser = filereader.FileReader.setup_parser(SimpleTextParser.extension)
-    argsDict = filereader.FileReader.create_args_dict(arg_parser)
-    reader = filereader.FileReader(SimpleTextParser(), argsDict['srcdir'], argsDict['destdir'])
-    reader.collect_and_print_lines()
-
-    if 'delete_duplicate_lines_from' in argsDict:
-        processable_file_names = argsDict['delete_duplicate_lines_from']
-        filenames_to_line_numbers_mapping = SimpleTextParser.get_deletable_line_numbers(processable_file_names,
-                                                                                        reader.parser.hashed_lines)
-        reader.delete_lines_from(filenames_to_line_numbers_mapping)
