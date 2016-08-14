@@ -33,10 +33,15 @@ class SimpleTextParser():
             self.hashed_lines[hashed_line] = Entry(file_name, content, line_number)
 
     def print_all(self):
+        duplicate_count = 0
         for i, hashed_line in enumerate(self.hashed_lines):
             if len(self.hashed_lines[hashed_line].filenames) > 1:
+                duplicate_count += 1
                 print('Found line {0} in multiple files: {1}'.format(self.hashed_lines[hashed_line].content,
                                                                      self.hashed_lines[hashed_line].filenames))
+
+        print('Summary: %n')
+        print('Number of duplicates found in all files {0}'.format(duplicate_count))
 
     @staticmethod
     def get_deletable_line_numbers(processable_file_names, hashed_lines):
