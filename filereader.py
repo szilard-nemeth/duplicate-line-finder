@@ -11,10 +11,10 @@ class FileReader:
         self.unique_items = 0
         assert self.parser.extension
 
-    def list_files(self, from_path):
+    def get_file_paths(self, from_path):
         print('PRINTING FILE TREE FROM PATH {0}'.format(from_path))
 
-        matched_file_count = 0
+        file_paths = []
         for root, dirs, files in os.walk(from_path):
             level = root.replace(from_path, '').count(os.sep)
             indent = ' ' * 4 * level
@@ -23,37 +23,37 @@ class FileReader:
             for f in files:
                 print('{}{}'.format(subindent, f))
                 if f.endswith(self.parser.extension):
-                    matched_file_count += 1
+                    file_paths.append(os.path.join(root, f))
 
         print('------------------------------------------------')
-        print('FOUND {0} FILES WITH MATCHING EXTENSION(S)'.format(matched_file_count))
+        print('FOUND {0} FILES WITH MATCHING EXTENSION(S): {1}'.format(len(file_paths), self.parser.extension))
         print('------------------------------------------------')
 
-    def collect_and_print_lines(self):
-        self.collect_lines()
+        return file_paths
+
+    def collect_and_print_lines(self, file_paths):
+        self.collect_lines(file_paths)
         self.parser.print_all()
 
-    def collect_lines(self):
+    def collect_lines(self, file_paths):
         self.unique_items = 0
-        for file_name in os.listdir(self.src_dir):
-            if file_name.endswith(self.parser.extension):
-                file_path = os.path.join(self.src_dir, file_name)
-                print('Processing file: {0}'.format(file_path))
+        for file_path in file_paths:
+            print('Processing file: {0}'.format(file_path))
 
-                last_read_line_count = 0
-                with open(file_path, "r", encoding='utf-8', errors='ignore') as file:
-                    for line_idx, line in enumerate(file):
-                        # line_idx is starting from 0
-                        line_number = line_idx + 1
-                        self.parser.process_line(line, file_path, line_number)
-                        last_read_line_count = line_number
+            last_read_line_count = 0
+            with open(file_path, "r", encoding='utf-8', errors='ignore') as file:
+                for line_idx, line in enumerate(file):
+                    # line_idx is starting from 0
+                    line_number = line_idx + 1
+                    self.parser.process_line(line, file_path, line_number)
+                    last_read_line_count = line_number
 
-                print("Found {0} elements in file {1}".format(str(last_read_line_count), file_path))
+            print("Found {0} elements in file {1}".format(str(last_read_line_count), file_path))
 
-                unique_items_length_old = self.unique_items
-                self.unique_items += last_read_line_count
-                print('Changed count of unique items (sum of all files): {0} --> {1}'.format(unique_items_length_old,
-                                                                                             self.unique_items))
+            unique_items_length_old = self.unique_items
+            self.unique_items += last_read_line_count
+            print('Changed count of unique items (sum of all files): {0} --> {1}'.format(unique_items_length_old,
+                                                                                         self.unique_items))
         print('Found {0} unique elements in ALL FILES'.format(str(self.unique_items)))
 
     def delete_lines_from(self, delete_from_files):
