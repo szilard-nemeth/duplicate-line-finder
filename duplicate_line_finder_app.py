@@ -42,6 +42,7 @@ if __name__ == "__main__":
     arg_parser = ArgumentParser.setup_parser(SimpleTextParser.extension)
     args = ArgumentParser.create_args_dict(arg_parser)
     reader = FileReader(SimpleTextParser(), args['srcdir'], args['destdir'])
+    reader.list_files(args['srcdir'])
     reader.collect_and_print_lines()
 
     if 'delete_duplicate_lines_from' in args:

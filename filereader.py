@@ -11,6 +11,24 @@ class FileReader:
         self.unique_items = 0
         assert self.parser.extension
 
+    def list_files(self, from_path):
+        print('PRINTING FILE TREE FROM PATH {0}'.format(from_path))
+
+        matched_file_count = 0
+        for root, dirs, files in os.walk(from_path):
+            level = root.replace(from_path, '').count(os.sep)
+            indent = ' ' * 4 * level
+            print('{}{}/'.format(indent, os.path.basename(root)))
+            subindent = ' ' * 4 * (level + 1)
+            for f in files:
+                print('{}{}'.format(subindent, f))
+                if f.endswith(self.parser.extension):
+                    matched_file_count += 1
+
+        print('------------------------------------------------')
+        print('FOUND {0} FILES WITH MATCHING EXTENSION(S)'.format(matched_file_count))
+        print('------------------------------------------------')
+
     def collect_and_print_lines(self):
         self.collect_lines()
         self.parser.print_all()
