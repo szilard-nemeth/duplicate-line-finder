@@ -40,7 +40,7 @@ class SimpleTextParser():
                 print('Found line {0} in multiple files: {1}'.format(self.hashed_lines[hashed_line].content,
                                                                      self.hashed_lines[hashed_line].filenames))
 
-        print('Summary: %n')
+        print('Summary: ')
         print('Number of duplicates found in all files {0}'.format(duplicate_count))
 
     @staticmethod
