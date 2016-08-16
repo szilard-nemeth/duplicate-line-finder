@@ -1,11 +1,11 @@
 import argparse
 import os
 from filereader import FileReader
+import helper
 from simple_text_parser import SimpleTextParser
 
 
 class ArgumentParser:
-
     @staticmethod
     def check_file(file):
         if not os.path.exists(file):
@@ -21,8 +21,10 @@ class ArgumentParser:
         parser.add_argument('--destdir', required=True,
                             help='destination dir where result files will be created')
 
-        parser.add_argument('--delete-duplicate-lines-from', nargs='*', type=ArgumentParser.check_file,
-                            help="Found duplicate lines will be deleted from the provided list of files in all cases.",
+        parser.add_argument('--delete-duplicate-lines-from-paths', nargs='*', type=ArgumentParser.check_file,
+                            help="Found duplicate lines will be deleted from either: \n"
+                                 "- the provided list of files"
+                                 "- the files under the provided list of directories (recursively)",
                             default=None)
         return parser
 
@@ -45,8 +47,16 @@ if __name__ == "__main__":
     file_paths = reader.get_file_paths(args['srcdir'])
     reader.collect_and_print_lines(file_paths)
 
-    if 'delete_duplicate_lines_from' in args:
-        processable_file_names = args['delete_duplicate_lines_from']
-        filenames_to_line_numbers_mapping = SimpleTextParser.get_deletable_line_numbers(processable_file_names,
+    if 'delete_duplicate_lines_from_paths' in args:
+        processable_paths = args['delete_duplicate_lines_from_paths']
+        processable_paths = reader.get_all_files_from_paths(processable_paths)
+
+        filenames_to_line_numbers_mapping = SimpleTextParser.get_deletable_line_numbers(processable_paths,
                                                                                         reader.parser.hashed_lines)
-        reader.delete_lines_from(filenames_to_line_numbers_mapping)
+
+        print('WARNING!! Based on the provided paths, {0} files will be affected by duplicate line deletion deletion. '
+              .format(len(filenames_to_line_numbers_mapping)))
+
+        answer = helper.Helper.query_yes_no("Do you really want to continue?")
+        if answer:
+            reader.delete_lines_from(filenames_to_line_numbers_mapping)

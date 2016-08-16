@@ -45,20 +45,22 @@ class SimpleTextParser():
         print('------------------------------------------------')
 
     @staticmethod
-    def get_deletable_line_numbers(processable_file_names, hashed_lines):
-        print('Preparing making of "delete line index data" for files: {0}'.format(processable_file_names))
+    def get_deletable_line_numbers(paths, hashed_lines):
+        print('Preparing making of "delete line index data" for paths: {0}'.format(paths))
         filenames_and_line_numbers = dict()
 
-        # key: hash, value: Entry
+        # key: hash,
+        # value: Entry
         for key, value in hashed_lines.items():
             # filenames the lines should be deleted from
-            for file_name in processable_file_names:
-                # processable_file_name is part of filenames list and there is more than 1 filename for the particular hash
-                if file_name in value.filenames and len(value.filenames) > 1:
-                    # value[file_name] contains the line numbers for the matched file
-                    if file_name in filenames_and_line_numbers:
-                        filenames_and_line_numbers[file_name].extend(value.filenames[file_name])
+            for path in paths:
+                # store the path if and only if path is part of the filenames list
+                # and more than 1 filename belongs to the particular hashed line
+                if path in value.filenames and len(value.filenames) > 1:
+                    # value[path] contains the line numbers for the matched file
+                    if path in filenames_and_line_numbers:
+                        filenames_and_line_numbers[path].extend(value.filenames[path])
                     else:
-                        filenames_and_line_numbers[file_name] = value.filenames[file_name]
+                        filenames_and_line_numbers[path] = value.filenames[path]
 
         return filenames_and_line_numbers

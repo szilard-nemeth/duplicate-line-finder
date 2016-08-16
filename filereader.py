@@ -1,5 +1,6 @@
 import codecs
 import os
+from helper import Helper
 
 
 class FileReader:
@@ -57,17 +58,47 @@ class FileReader:
         print('Found {0} unique elements in ALL FILES'.format(str(self.unique_items)))
 
     def delete_lines_from(self, delete_from_files):
-        for file_name in delete_from_files.keys():
-            file_name = os.path.join(self.src_dir, file_name)
 
-            line_numbers_to_delete = delete_from_files[file_name]
-            print("Will remove {0} lines from file {1}".format(len(line_numbers_to_delete), file_name))
+        if not os.path.exists(self.dest_dir):
+            print('Creating not existing destination directory: {0}'.format(self.dest_dir))
+            os.makedirs(self.dest_dir)
+        for old_file_path in delete_from_files.keys():
+            line_numbers_to_delete = delete_from_files[old_file_path]
+            print('------------------------------------------------')
+            print('------------------------------------------------')
+            print('Processing duplicate skipping from file: {0}'.format(old_file_path))
+            print("Will skip {0} lines from file {1}".format(len(line_numbers_to_delete), old_file_path))
+            print('------------------------------------------------')
+            print('------------------------------------------------')
 
-            with open(file_name, "r", encoding='utf-8', errors='ignore') as old_file, \
-                    open(file_name + "_updated", "w", encoding='utf-8', errors='ignore') as new_file:
+            new_file_path = old_file_path.replace(self.src_dir, self.dest_dir)
+            Helper.make_dirs(os.path.dirname(new_file_path))
+
+            with open(old_file_path, "r", encoding='utf-8', errors='ignore') as old_file, \
+                    open(new_file_path, "w", encoding='utf-8', errors='ignore') as new_file:
                 for line_idx, line in enumerate(old_file):
                     line_number = line_idx + 1
                     if not line_number in line_numbers_to_delete:
                         new_file.write(line)
                     else:
-                        print('Removing line {0} from {1}'.format(line_number, file_name))
+                        print('Skipping line {0} from {1}'.format(line_number, new_file_path))
+
+            print('------------------------------------------------')
+            print('------------------------------------------------')
+
+    def get_all_files_from_paths(self, processable_paths):
+        file_paths = set()
+
+        for path in processable_paths:
+            if os.path.isdir(path):
+                for dirname, dirnames, filenames in os.walk(path):
+                    for subdirname in dirnames:
+                        #nothing to do now
+                        pass
+
+                    for filename in filenames:
+                        file_paths.add(os.path.join(dirname, filename))
+            else:
+                file_paths.add(path)
+
+        return file_paths
