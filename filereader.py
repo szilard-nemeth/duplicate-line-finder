@@ -68,8 +68,6 @@ class FileReader:
             print('------------------------------------------------')
             print('Processing duplicate skipping from file: {0}'.format(old_file_path))
             print("Will skip {0} lines from file {1}".format(len(line_numbers_to_delete), old_file_path))
-            print('------------------------------------------------')
-            print('------------------------------------------------')
 
             new_file_path = old_file_path.replace(self.src_dir, self.dest_dir)
             Helper.make_dirs(os.path.dirname(new_file_path))
