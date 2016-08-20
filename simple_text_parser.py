@@ -2,6 +2,7 @@ import hashlib
 import sys
 import os
 from pprint import pprint
+import operator
 
 scriptpath = "../collector.py"
 sys.path.append(os.path.abspath(scriptpath))
@@ -73,8 +74,10 @@ class SimpleTextParser():
                 #sort the dictionary by the file_props.defined_as_file property
                 #True valued defined_as_file comes first,
                 #this means that the items defined as separate files takes precedence in the marking process
-                sorted_paths = sorted(filtered_paths, key=lambda x: filtered_paths[x].defined_as_file, reverse=True)
-                for file_name in sorted_paths:
+
+                #sorted_paths = sorted(filtered_paths, key=lambda x: filtered_paths[x].defined_as_file, reverse=True) #produces a list of paths
+                sorted_paths = sorted(filtered_paths.items(), key=lambda kv: (kv[1].defined_as_file, kv[0]), reverse=True) #produces list of tuples
+                for file_name, _ in sorted_paths:
                     if file_name in filenames_and_line_numbers:
                         filenames_and_line_numbers[file_name].extend(value.filenames[file_name])
                     else:
