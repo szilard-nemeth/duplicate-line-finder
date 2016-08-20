@@ -32,11 +32,11 @@ class FileReader:
 
         return file_paths
 
-    def collect_and_print_lines(self, file_paths):
-        self.collect_lines(file_paths)
-        self.parser.print_all()
+    def collect_and_print_lines(self, file_paths, summary):
+        self.collect_lines(file_paths, summary)
+        summary.process_lines_dict(self.parser.hashed_lines)
 
-    def collect_lines(self, file_paths):
+    def collect_lines(self, file_paths, summary):
         self.unique_items = 0
         for file_path in file_paths:
             print('Processing file: {0}'.format(file_path))
@@ -49,13 +49,15 @@ class FileReader:
                     self.parser.process_line(line, file_path, line_number)
                     last_read_line_count = line_number
 
+            #TODO debug log instead of print
             print("Found {0} elements in file {1}".format(str(last_read_line_count), file_path))
 
             unique_items_length_old = self.unique_items
             self.unique_items += last_read_line_count
+            #TODO debug log instead of print
             print('Changed count of unique items (sum of all files): {0} --> {1}'.format(unique_items_length_old,
                                                                                          self.unique_items))
-        print('Found {0} unique elements in ALL FILES'.format(str(self.unique_items)))
+        summary.store_unique_items_count(self.unique_items)
 
     def delete_lines_from(self, delete_from_files):
 

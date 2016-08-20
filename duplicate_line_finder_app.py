@@ -3,6 +3,7 @@ import os
 from filereader import FileReader
 import helper
 from simple_text_parser import SimpleTextParser
+from summary import Summary
 
 
 class ArgumentParser:
@@ -40,23 +41,30 @@ class ArgumentParser:
         return args_dict
 
 
+
+
 if __name__ == "__main__":
     arg_parser = ArgumentParser.setup_parser(SimpleTextParser.extension)
     args = ArgumentParser.create_args_dict(arg_parser)
     reader = FileReader(SimpleTextParser(), args['srcdir'], args['destdir'])
     file_paths = reader.get_file_paths(args['srcdir'])
-    reader.collect_and_print_lines(file_paths)
 
-    if 'delete_duplicate_lines_from_paths' in args:
+    summary = Summary()
+    reader.collect_and_print_lines(file_paths, summary)
+
+    if 'delete_duplicate_lines_from_paths' not in args:
+        summary.print()
+    else:
         processable_paths = args['delete_duplicate_lines_from_paths']
         processable_paths = reader.get_all_files_from_paths(processable_paths)
 
         filenames_to_line_numbers_mapping = SimpleTextParser.get_deletable_line_numbers(processable_paths,
-                                                                                        reader.parser.hashed_lines)
+                                                                                        reader.parser.hashed_lines,
+                                                                                        summary)
 
-        print('WARNING!! Based on the provided paths, {0} files will be affected by duplicate line deletion deletion. '
-              .format(len(filenames_to_line_numbers_mapping)))
-
+        summary.store_info_processed_hashed_lines(filenames_to_line_numbers_mapping)
+        summary.print()
+        summary.print_warning_message()
         answer = helper.Helper.query_yes_no("Do you really want to continue?")
         if answer:
             reader.delete_lines_from(filenames_to_line_numbers_mapping)

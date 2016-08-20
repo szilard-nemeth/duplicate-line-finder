@@ -34,27 +34,10 @@ class SimpleTextParser():
         else:
             self.hashed_lines[hashed_line] = Entry(file_name, content, line_number)
 
-    def print_all(self):
-        duplicate_lines = 0
-        duplicate_line_occurences = 0
-        for i, hashed_line in enumerate(self.hashed_lines):
-            line_occurences = len(self.hashed_lines[hashed_line].filenames)
-            if line_occurences > 1:
-                duplicate_line_occurences += line_occurences
-                duplicate_lines += 1
-                print('Found line {0} in multiple files: {1}'.format(self.hashed_lines[hashed_line].content,
-                                                                     self.hashed_lines[hashed_line].filenames))
-        print('------------------------------------------------')
-        print('Summary: ')
-        print('Number of duplicate lines found in all files {0}'.format(duplicate_lines))
-        print('Number of all duplicate line occurences found in all files {0}'.format(duplicate_line_occurences))
-        print('------------------------------------------------')
-
     @staticmethod
-    def get_deletable_line_numbers(paths, hashed_lines):
-        print('Preparing making of "delete line index data" for paths:')
-        paths_sorted = sorted(list(paths.keys()))
-        pprint(paths_sorted)
+    def get_deletable_line_numbers(paths, hashed_lines, summary):
+        print('Preparing making of deletable line numbers dict...')
+        summary.store_all_files_checked(sorted(list(paths.keys())))
 
         filenames_and_line_numbers = dict()
         # key: hash,
