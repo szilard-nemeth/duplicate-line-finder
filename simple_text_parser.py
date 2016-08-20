@@ -52,15 +52,40 @@ class SimpleTextParser():
         # key: hash,
         # value: Entry
         for key, value in hashed_lines.items():
-            # filenames the lines should be deleted from
-            for path in paths:
-                # store the path if and only if path is part of the filenames list
-                # and more than 1 filename belongs to the particular hashed line
-                if path in value.filenames and len(value.filenames) > 1:
-                    # value[path] contains the line numbers for the matched file
-                    if path in filenames_and_line_numbers:
-                        filenames_and_line_numbers[path].extend(value.filenames[path])
-                    else:
-                        filenames_and_line_numbers[path] = value.filenames[path]
+            occurences_of_line = len(value.filenames)
+            line_found_in_more_than_one_files = occurences_of_line > 1
+            # Check first that more than 1 filename contains the particular line
+            if not line_found_in_more_than_one_files:
+                continue
+
+            # check if all found filenames for a line is part of the deletable file paths
+            if all((fn in paths for fn in value.filenames)):
+                marked_deleted_count = 0
+
+                filtered_paths = {fn: paths[fn] for fn in value.filenames}
+                #sort the dictionary by the file_props.defined_as_file property
+                #True valued defined_as_file comes first,
+                #this means that the items defined as separate files takes precedence in the marking process
+                sorted_paths = sorted(filtered_paths, key=lambda x: filtered_paths[x].defined_as_file, reverse=True)
+                for file_name in sorted_paths:
+                    filenames_and_line_numbers[file_name] = value.filenames[file_name]
+                    marked_deleted_count += 1
+
+                    #SHOULD ALWAYS KEEP ONE OCCURENCE AT LEAST IN ALL FILES!
+                    #In other words: the line should be mark for deletion at a maximum of (occurences_of_line - 1) times
+                    #In other words2: mark items specified as part of a folder as long we have only 1 occurence remaining
+                    if marked_deleted_count == (occurences_of_line - 1):
+                        break
+
+            else:
+                # filenames the lines should be deleted from
+                for path, file_props in paths.items():
+                    # store the path if path is part of the filenames list
+                    if path in value.filenames:
+                        # value[path] contains the line numbers for the matched file
+                        if path in filenames_and_line_numbers:
+                            filenames_and_line_numbers[path].extend(value.filenames[path])
+                        else:
+                            filenames_and_line_numbers[path] = value.filenames[path]
 
         return filenames_and_line_numbers

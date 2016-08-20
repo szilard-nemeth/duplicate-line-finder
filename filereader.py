@@ -74,6 +74,10 @@ class FileReader:
             new_file_path = old_file_path.replace(self.src_dir, self.dest_dir)
             Helper.make_dirs(os.path.dirname(new_file_path))
 
+
+            # #Note: this could produce zero-length files in dest_dir if all the lines is skipped in the source file!
+            ##However, it can be useful since a simple file diff between source file/destination file
+            ##will could that the whole file became empty so it can be deleted!
             with open(old_file_path, "r", encoding='utf-8', errors='ignore') as old_file, \
                     open(new_file_path, "w", encoding='utf-8', errors='ignore') as new_file:
                 for line_idx, line in enumerate(old_file):
@@ -87,18 +91,27 @@ class FileReader:
             print('------------------------------------------------')
 
     def get_all_files_from_paths(self, processable_paths):
-        file_paths = set()
 
+        class FileProperties(object):
+            def __init__(self, defined_as_file=False):
+                self.defined_as_file = defined_as_file
+
+        file_paths = dict()
         for path in processable_paths:
             if os.path.isdir(path):
                 for dirname, dirnames, filenames in os.walk(path):
                     for subdirname in dirnames:
-                        #nothing to do now
+                        # nothing to do now
                         pass
 
                     for filename in filenames:
-                        file_paths.add(os.path.join(dirname, filename))
+                        full_path = os.path.join(dirname, filename)
+                        # do not override value if this path was added
+                        # e.g. path defined as file, but also implicitly found in one of the specified directories,
+                        # in other words, contained somewhere in the dir's file tree
+                        if full_path not in file_paths:
+                            file_paths[full_path] = FileProperties(defined_as_file=False)
             else:
-                file_paths.add(path)
+                file_paths[path] = FileProperties(defined_as_file=True)
 
         return file_paths
