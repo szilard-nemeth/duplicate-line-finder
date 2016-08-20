@@ -1,6 +1,7 @@
 import hashlib
 import sys
 import os
+from pprint import pprint
 
 scriptpath = "../collector.py"
 sys.path.append(os.path.abspath(scriptpath))
@@ -33,22 +34,28 @@ class SimpleTextParser():
             self.hashed_lines[hashed_line] = Entry(file_name, content, line_number)
 
     def print_all(self):
-        duplicate_count = 0
+        duplicate_lines = 0
+        duplicate_line_occurences = 0
         for i, hashed_line in enumerate(self.hashed_lines):
-            if len(self.hashed_lines[hashed_line].filenames) > 1:
-                duplicate_count += 1
+            line_occurences = len(self.hashed_lines[hashed_line].filenames)
+            if line_occurences > 1:
+                duplicate_line_occurences += line_occurences
+                duplicate_lines += 1
                 print('Found line {0} in multiple files: {1}'.format(self.hashed_lines[hashed_line].content,
                                                                      self.hashed_lines[hashed_line].filenames))
         print('------------------------------------------------')
         print('Summary: ')
-        print('Number of duplicates found in all files {0}'.format(duplicate_count))
+        print('Number of duplicate lines found in all files {0}'.format(duplicate_lines))
+        print('Number of all duplicate line occurences found in all files {0}'.format(duplicate_line_occurences))
         print('------------------------------------------------')
 
     @staticmethod
     def get_deletable_line_numbers(paths, hashed_lines):
-        print('Preparing making of "delete line index data" for paths: {0}'.format(paths))
-        filenames_and_line_numbers = dict()
+        print('Preparing making of "delete line index data" for paths:')
+        paths_sorted = sorted(list(paths.keys()))
+        pprint(paths_sorted)
 
+        filenames_and_line_numbers = dict()
         # key: hash,
         # value: Entry
         for key, value in hashed_lines.items():
@@ -68,7 +75,11 @@ class SimpleTextParser():
                 #this means that the items defined as separate files takes precedence in the marking process
                 sorted_paths = sorted(filtered_paths, key=lambda x: filtered_paths[x].defined_as_file, reverse=True)
                 for file_name in sorted_paths:
-                    filenames_and_line_numbers[file_name] = value.filenames[file_name]
+                    if file_name in filenames_and_line_numbers:
+                        filenames_and_line_numbers[file_name].extend(value.filenames[file_name])
+                    else:
+                        filenames_and_line_numbers[file_name] = value.filenames[file_name]
+                        
                     marked_deleted_count += 1
 
                     #SHOULD ALWAYS KEEP ONE OCCURENCE AT LEAST IN ALL FILES!
