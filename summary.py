@@ -3,6 +3,14 @@ from pprint import pprint
 
 class Summary:
 
+    def __init__(self):
+        self.unique_items_count = None
+        self.all_files_checked = None
+        self.affected_file_count = None
+        self.count_of_lines_to_delete = None
+        self.duplicate_lines = 0
+        self.duplicate_line_occurences = 0
+
     def store_unique_items_count(self, unique_items_count):
         self.unique_items_count = unique_items_count
         #print('Found {0} unique elements in ALL FILES'.format(str(self.unique_items)))
@@ -16,7 +24,6 @@ class Summary:
         self.count_of_lines_to_delete = 0
         for line_numbers in hashed_lines.values():
             self.count_of_lines_to_delete += len(line_numbers)
-
 
     def process_lines_dict(self, lines_dict):
         self.duplicate_lines = 0
@@ -35,7 +42,6 @@ class Summary:
               '{0} files will be affected by duplicate line deletion and '
               '{1} lines will be deleted'
               .format(self.affected_file_count, self.count_of_lines_to_delete))
-
 
     def print(self):
         print('------------------------------------------------')
